@@ -13,6 +13,17 @@ Parameters:
       - prod
     Description: Deployment environment for the application.
 
+Globals:
+  Function:
+    Runtime: nodejs22.x
+    Architectures:
+      - x86_64
+    MemorySize: 256
+    Timeout: 10
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref NotesTable
+
 Resources:
   NotesTable:
     Type: AWS::DynamoDB::Table
@@ -20,7 +31,6 @@ Resources:
     UpdateReplacePolicy: Retain
     Properties:
       TableName: !Sub 'GhibliNotes-${Environment}'
-
       BillingMode: PAY_PER_REQUEST
 
       AttributeDefinitions:
@@ -37,3 +47,48 @@ Resources:
 
       SSESpecification:
         SSEEnabled: true
+
+  AddNoteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../backend/functions/addNote/
+      Handler: index.handler
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref NotesTable
+
+  GetNotesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../backend/functions/getNotes/
+      Handler: index.handler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref NotesTable
+
+  UpdateNoteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../backend/functions/updateNote/
+      Handler: index.handler
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref NotesTable
+
+  DeleteNoteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../backend/functions/deleteNote/
+      Handler: index.handler
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref NotesTable
+
+  DeleteAllNotesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../backend/functions/deleteAllNotes/
+      Handler: index.handler
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref NotesTable
