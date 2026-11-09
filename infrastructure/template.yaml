@@ -13,6 +13,23 @@ Parameters:
       - prod
     Description: Deployment environment for the application.
 
+  CognitoDomainPrefix:
+    Type: String
+    MinLength: 3
+    MaxLength: 63
+    Description: >
+      Unique lowercase Cognito hosted UI domain prefix for this AWS region.
+
+  CallbackUrl:
+    Type: String
+    Default: http://localhost:5500/
+    Description: OAuth callback URL for local frontend development.
+
+  LogoutUrl:
+    Type: String
+    Default: http://localhost:5500/
+    Description: OAuth logout redirect URL for local frontend development.
+
 Globals:
   Function:
     Runtime: nodejs22.x
@@ -92,3 +109,87 @@ Resources:
       Policies:
         - DynamoDBWritePolicy:
             TableName: !Ref NotesTable
+
+  # Cognito User Pool
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      UserPoolName: !Sub 'GhibliNotes-${Environment}'
+
+      UsernameAttributes:
+        - email
+
+      AutoVerifiedAttributes:
+        - email
+
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12
+          RequireLowercase: true
+          RequireUppercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          TemporaryPasswordValidityDays: 7
+
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+
+  # Public Cognito App Client
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPool
+      EnableTokenRevocation: true
+
+      ClientName: !Sub 'GhibliNotes-${Environment}-web'
+
+      GenerateSecret: false
+
+      PreventUserExistenceErrors: ENABLED
+
+      AllowedOAuthFlowsUserPoolClient: true
+
+      AllowedOAuthFlows:
+        - code
+
+      AllowedOAuthScopes:
+        - openid
+        - email
+        - profile
+
+      SupportedIdentityProviders:
+        - COGNITO
+
+      CallbackURLs:
+        - !Ref CallbackUrl
+
+      LogoutURLs:
+        - !Ref LogoutUrl
+
+  # Cognito Hosted UI Domain
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Ref CognitoDomainPrefix
+      UserPoolId: !Ref UserPool
+
+Outputs:
+  UserPoolId:
+    Description: Cognito User Pool ID
+    Value: !Ref UserPool
+
+  UserPoolClientId:
+    Description: Cognito App Client ID
+    Value: !Ref UserPoolClient
+
+  CognitoDomain:
+    Description: Cognito Hosted UI domain
+    Value: !Sub 'https://${CognitoDomainPrefix}.auth.${AWS::Region}.amazoncognito.com'
+
+  CognitoIssuer:
+    Description: Cognito JWT token issuer
+    Value: !Sub 'https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}'
