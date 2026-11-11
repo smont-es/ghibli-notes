@@ -1,0 +1,150 @@
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    font-family: 'Roboto', sans-serif;
+    color: #fff;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed; /* optional for a parallax effect */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 20px;
+  }
+
+  /* Header at the top */
+  header {
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    text-align: center;
+    font-size: 2em;
+    width: 100%;
+    max-width: 800px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+  }
+
+  /* Change Theme Button */
+  #changeThemeBtn {
+    background: rgba(0, 0, 0, 0.2);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    margin-bottom: 15px;
+    transition: background 0.3s;
+  }
+
+  #changeThemeBtn:hover {
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  /* Style your note input and notes container */
+  #noteInput {
+    width: 80%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    margin-top: 15px;
+  }
+
+  /* Style for Title input */
+  #noteId {
+    width: 80%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    margin-top: 15px;
+  }
+
+  /* Common style for Add Note and Search Notes buttons */
+  .styleBtn {
+    background: rgba(0, 0, 0, 0.2);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background 0.3s;
+  }
+
+  .styleBtn:hover {
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  #notesContainer {
+    margin-top: 20px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Style for individual notes with transparent black background */
+  .note {
+    background: rgba(0, 0, 0, 0.2);
+    color: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    width: 80%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Note header (title) */
+  .note-header {
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+
+  /* Note content container */
+  .note-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* Text span for note display */
+  .note-text {
+    flex: 1;
+    margin-right: 10px;
+  }
+
+  /* Buttons container inside notes */
+  .note-buttons {
+    display: flex;
+    gap: 5px;
+  }
+
+  /* Style for delete button */
+  .deleteBtn, .editBtn {
+    background: #e76f51;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-size: 1.2em;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  /* Style for "Edit" button */
+  .editBtn {
+    border-radius: 4px;
+    width: auto;
+    padding: 4px 8px;
+    font-size: 0.9em;
+  }

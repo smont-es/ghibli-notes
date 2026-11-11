@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+﻿AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 
 Description: >
@@ -65,50 +65,115 @@ Resources:
       SSESpecification:
         SSEEnabled: true
 
+  # Add Note Lambda Function
   AddNoteFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ../backend/functions/addNote/
       Handler: index.handler
       Policies:
-        - DynamoDBWritePolicy:
-            TableName: !Ref NotesTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:PutItem
+              Resource: !GetAtt NotesTable.Arn
+      Events:
+        AddNote:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref NotesApi
+            Path: /notes
+            Method: POST
 
+  # Get Notes Lambda Function
   GetNotesFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ../backend/functions/getNotes/
       Handler: index.handler
       Policies:
-        - DynamoDBReadPolicy:
-            TableName: !Ref NotesTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:Query
+              Resource: !GetAtt NotesTable.Arn
+      Events:
+        GetAllNotes:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref NotesApi
+            Path: /notes
+            Method: GET
 
+        GetSingleNote:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref NotesApi
+            Path: /notes/{noteId}
+            Method: GET
+
+  # Update Note Lambda Function
   UpdateNoteFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ../backend/functions/updateNote/
       Handler: index.handler
       Policies:
-        - DynamoDBWritePolicy:
-            TableName: !Ref NotesTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:UpdateItem
+              Resource: !GetAtt NotesTable.Arn
+      Events:
+        UpdateNote:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref NotesApi
+            Path: /notes/{noteId}
+            Method: PATCH
 
+  # Delete Single Note Lambda Function
   DeleteNoteFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ../backend/functions/deleteNote/
       Handler: index.handler
       Policies:
-        - DynamoDBWritePolicy:
-            TableName: !Ref NotesTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:DeleteItem
+              Resource: !GetAtt NotesTable.Arn
+      Events:
+        DeleteNote:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref NotesApi
+            Path: /notes/{noteId}
+            Method: DELETE
 
+  # Delete All Notes Lambda Function
   DeleteAllNotesFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ../backend/functions/deleteAllNotes/
       Handler: index.handler
+      Timeout: 30
       Policies:
-        - DynamoDBWritePolicy:
-            TableName: !Ref NotesTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:Query
+                - dynamodb:DeleteItem
+              Resource: !GetAtt NotesTable.Arn
+      Events:
+        DeleteAllNotes:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref NotesApi
+            Path: /notes
+            Method: DELETE
 
   # Cognito User Pool
   UserPool:
@@ -177,6 +242,39 @@ Resources:
       Domain: !Ref CognitoDomainPrefix
       UserPoolId: !Ref UserPool
 
+  # API Gateway HTTP API
+  NotesApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref Environment
+
+      CorsConfiguration:
+        AllowOrigins:
+          - http://localhost:5500
+        AllowHeaders:
+          - Authorization
+          - Content-Type
+        AllowMethods:
+          - GET
+          - POST
+          - PATCH
+          - DELETE
+          - OPTIONS
+        MaxAge: 300
+
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+
+        Authorizers:
+          CognitoAuthorizer:
+            IdentitySource: "$request.header.Authorization"
+            AuthorizationScopes:
+              - openid
+            JwtConfiguration:
+              issuer: !Sub 'https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}'
+              audience:
+                - !Ref UserPoolClient
+
 Outputs:
   UserPoolId:
     Description: Cognito User Pool ID
@@ -193,3 +291,7 @@ Outputs:
   CognitoIssuer:
     Description: Cognito JWT token issuer
     Value: !Sub 'https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}'
+
+  NotesApiUrl:
+    Description: API Gateway endpoint URL
+    Value: !Sub 'https://${NotesApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}'

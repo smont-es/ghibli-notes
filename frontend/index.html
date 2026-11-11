@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ghibli Notes with Dynamic Background</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header>Ghibli Notes</header>
+
+<!-- Authentication controls -->
+<section id="authSection">
+  <span id="authStatus">You are not signed in.</span>
+  <button id="signInBtn">Sign In</button>
+  <button id="signOutBtn" hidden>Sign Out</button>
+</section>
+
+<button id="changeThemeBtn">Change Theme</button>
+
+<!-- Note taking container -->
+<!-- Note taking container -->
+<div id="notesApp" class="container" style="width:100%; max-width:800px; padding:20px;" hidden>
+  <!-- Title input -->
+  <input type="text" id="noteId" placeholder="Title" />
+  <!-- User input for note content -->
+  <input type="text" id="noteInput" placeholder="Write your note here..." />
+  <!-- Buttons for Add and Search -->
+  <div style="display:flex; gap:10px; margin-top:10px;">
+    <button id="addBtn" class="styleBtn">Add Note</button>
+    <button id="searchBtn" class="styleBtn">Search Notes</button>
+  </div>
+  <div id="notesContainer"></div>
+</div>
+<script src="js/config.js" defer></script>
+<script src="js/auth.js" defer></script>
+<script src="js/api.js" defer></script>
+<script src="js/app.js" defer></script>
+</body>
+</html>
